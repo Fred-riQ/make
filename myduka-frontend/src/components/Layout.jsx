@@ -16,9 +16,6 @@ export default function Layout() {
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <CssBaseline />
       
-      {/* Navbar */}
-      <Navbar handleDrawerToggle={handleDrawerToggle} drawerWidth={drawerWidth} />
-      
       {/* Sidebar */}
       <Sidebar 
         mobileOpen={mobileOpen} 
@@ -47,8 +44,6 @@ export default function Layout() {
         </Box>
       </Box>
       
-      {/* Footer */}
-      <Footer drawerWidth={drawerWidth} />
     </Box>
   );
 }

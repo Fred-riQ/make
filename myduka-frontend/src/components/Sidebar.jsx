@@ -8,7 +8,10 @@ import {
   ListItemText,
   Divider,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Typography,
+  Toolbar,
+  Box
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -16,9 +19,7 @@ import {
   Assessment as ReportsIcon,
   People as UsersIcon,
   ShoppingCart as SupplyIcon,
-  Settings as SettingsIcon,
-  ChevronLeft as ChevronLeftIcon,
-  ChevronRight as ChevronRightIcon
+  Settings as SettingsIcon
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -33,7 +34,7 @@ const menuItems = [
   { text: 'Settings', icon: <SettingsIcon />, path: '/settings' }
 ];
 
-export default function Sidebar({ mobileOpen, handleDrawerToggle, drawerWidth }) {
+export default function Sidebar({ mobileOpen, handleDrawerToggle }) {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
@@ -92,7 +93,7 @@ export default function Sidebar({ mobileOpen, handleDrawerToggle, drawerWidth })
         open={mobileOpen}
         onClose={handleDrawerToggle}
         ModalProps={{
-          keepMounted: true, // Better open performance on mobile.
+          keepMounted: true,
         }}
         sx={{
           display: { xs: 'block', sm: 'none' },
