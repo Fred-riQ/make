@@ -1,26 +1,41 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import api from '../../api/api';
+import { productAPI } from '../../api/api';
 
+// Fetch products
 export const fetchProducts = createAsyncThunk(
   'products/fetchProducts',
-  async (_, { rejectWithValue }) => {
+  async (storeId, { rejectWithValue }) => {
     try {
-      const response = await api.get('/products');
+      const response = await productAPI.getProducts(storeId);
       return response.data;
     } catch (err) {
-      return rejectWithValue(err.response.data);
+      return rejectWithValue(err.response?.data);
     }
   }
 );
 
+// Add product
 export const addProduct = createAsyncThunk(
   'products/addProduct',
-  async (productData, { rejectWithValue }) => {
+  async ({ storeId, productData }, { rejectWithValue }) => {
     try {
-      const response = await api.post('/products', productData);
+      const response = await productAPI.addProduct(storeId, productData);
       return response.data;
     } catch (err) {
-      return rejectWithValue(err.response.data);
+      return rejectWithValue(err.response?.data);
+    }
+  }
+);
+
+// Delete product
+export const deleteProduct = createAsyncThunk(
+  'products/deleteProduct',
+  async (productId, { rejectWithValue }) => {
+    try {
+      await productAPI.deleteProduct(productId);
+      return productId;
+    } catch (err) {
+      return rejectWithValue(err.response?.data);
     }
   }
 );
@@ -44,10 +59,13 @@ const productsSlice = createSlice({
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.payload?.message || 'Failed to fetch products';
+        state.error = action.payload?.message;
       })
       .addCase(addProduct.fulfilled, (state, action) => {
         state.items.push(action.payload);
+      })
+      .addCase(deleteProduct.fulfilled, (state, action) => {
+        state.items = state.items.filter(item => item.id !== action.payload);
       });
   }
 });

@@ -1,16 +1,38 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../../api/api';
-import { setCredentials } from './authSlice';
+import { Button, TextField, Checkbox, Typography, Link, Paper } from '@mui/material';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import { styled } from '@mui/system';
+
+const LoginContainer = styled(Paper)({
+  padding: '2rem',
+  maxWidth: '450px',
+  margin: '2rem auto',
+  textAlign: 'center',
+});
+
+const FormContainer = styled('div')({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '1rem',
+  marginTop: '1.5rem',
+});
+
+const RememberMeContainer = styled('div')({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  margin: '1rem 0',
+});
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -21,60 +43,95 @@ export default function Login() {
     try {
       const response = await authAPI.login({ email, password });
       
-      // Save token and user data in Redux store
-      dispatch(setCredentials({
-        user: response.data.user,
-        token: response.data.token
-      }));
-      
       // Store token in localStorage
       localStorage.setItem('token', response.data.token);
       
       // Redirect to dashboard
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="login-container">
-      <h2>MyDuka - Login</h2>
-      {error && <div className="alert alert-danger">{error}</div>}
+    <LoginContainer elevation={3}>
+      <LockOutlinedIcon color="primary" style={{ fontSize: '2.5rem' }} />
+      <Typography variant="h5" gutterBottom>
+        Log in to your account
+      </Typography>
+      
+      <Typography variant="body2" color="textSecondary" paragraph>
+        Change your Password immediately you log in
+      </Typography>
+      
+      <hr style={{ width: '100%', margin: '1.5rem 0' }} />
       
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Email Address</label>
-          <input
-            type="email"
-            className="form-control"
+        <FormContainer>
+          <Typography variant="subtitle1" align="left">
+            Email
+          </Typography>
+          <TextField
+            variant="outlined"
+            placeholder="Enter your email"
+            fullWidth
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-        </div>
-        
-        <div className="form-group">
-          <label>Password</label>
-          <input
+          
+          <Typography variant="subtitle1" align="left" style={{ marginTop: '1rem' }}>
+            Password
+          </Typography>
+          <TextField
+            variant="outlined"
             type="password"
-            className="form-control"
+            placeholder="Enter your password"
+            fullWidth
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-        </div>
-        
-        <button 
-          type="submit" 
-          className="btn btn-primary"
-          disabled={isLoading}
-        >
-          {isLoading ? 'Logging in...' : 'Login'}
-        </button>
+          
+          <RememberMeContainer>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <Checkbox
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                color="primary"
+              />
+              <Typography variant="body2">Remember for 30 days</Typography>
+            </div>
+            <Link href="#" variant="body2">
+              Forget password
+            </Link>
+          </RememberMeContainer>
+          
+          {error && (
+            <Typography color="error" variant="body2">
+              {error}
+            </Typography>
+          )}
+          
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            size="large"
+            disabled={isLoading}
+            style={{ marginTop: '1rem' }}
+          >
+            {isLoading ? 'Signing in...' : 'Sign in'}
+          </Button>
+        </FormContainer>
       </form>
-    </div>
+      
+      <Typography variant="body2" style={{ marginTop: '2rem' }}>
+        Don't have log in credentials? <Link href="#">Request to Admin</Link>
+      </Typography>
+    </LoginContainer>
   );
 }
