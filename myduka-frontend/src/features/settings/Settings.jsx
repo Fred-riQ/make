@@ -18,7 +18,8 @@ import {
 import ProfileSettings from './ProfileSettings';
 import SecuritySettings from './SecuritySettings';
 import NotificationSettings from './NotificationSettings';
-// import ThemeSettings from './ThemeSettings';
+import StoreSettings from './StoreSettings'; 
+
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -102,9 +103,7 @@ export default function Settings() {
       <TabPanel value={value} index={3}>
         <StoreSettings onSuccess={handleSuccess} />
       </TabPanel>
-      <TabPanel value={value} index={4}>
-        <ThemeSettings onSuccess={handleSuccess} />
-      </TabPanel>
+      
     </Box>
   );
 }

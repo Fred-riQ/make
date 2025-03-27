@@ -5,19 +5,19 @@ import Home from './pages/Home';
 import About from './pages/About';
 import NotFound from './pages/NotFound';
 import Login from './features/auth/Login';
-import Register from './features/auth/Register';
 import DashboardSelector from './features/dashboard/DashboardSelector';
 import Products from './features/products/Products';
 import ProductForm from './features/products/ProductForm';
 import AdminPanel from './features/admin/AdminPanel';
 import UserManagement from './features/admin/UserManagement';
-import SupplyRequest from './features/supply/SupplyRequestsList';
+import SupplyRequestsList from './features/supply/SupplyRequestsList';
 import Reports from './features/reports/Reports';
 import SalesReport from './features/reports/SalesReport';
 import InventoryReport from './features/reports/InventoryReport';
 import ProtectedRoute from './components/ProtectedRoute';
 import ClerkRoute from './components/ClerkRoute';
 import Settings from './features/settings/Settings';
+import StoreManagement from './features/store/StoreManagement';
 
 function App() {
   return (
@@ -30,7 +30,7 @@ function App() {
         {/* Auth Routes */}
         <Route path="auth">
           <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
+        
         </Route>
 
         {/* Protected Routes (All authenticated users) */}
@@ -44,7 +44,7 @@ function App() {
           <Route path="products" element={<Products />} />
           <Route path="products/new" element={<ProductForm />} />
           <Route path="products/edit/:id" element={<ProductForm />} />
-          <Route path="supply-requests/new" element={<SupplyRequest />} />
+          <Route path="supply-requests/new" element={<SupplyRequestsList/>} />
         </Route>
 
         {/* Admin-only Routes */}
@@ -61,9 +61,7 @@ function App() {
 
         {/* Merchant-only Routes */}
         <Route element={<ProtectedRoute roles={['merchant']} />}>
-          <Route path="financials" element={<FinancialDashboard />} />
-          <Route path="store-management" element={<StoreManagement />} />
-        </Route>
+        <Route path="store-management" element={<StoreManagement />} />        </Route>
 
         {/* Catch-all 404 */}
         <Route path="*" element={<NotFound />} />

@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, createSelector, isAnyOf } from '@reduxjs/toolkit';
 import api from '../../api/api';
 
 // Helper function for API error handling
@@ -112,7 +112,8 @@ const authSlice = createSlice({
     status: 'idle',
     error: null,
     isAuthenticated: false,
-    emailVerified: false
+    emailVerified: false,
+    role: null
   },
   reducers: {
     logout: (state) => {
@@ -123,33 +124,25 @@ const authSlice = createSlice({
       state.refreshToken = null;
       state.isAuthenticated = false;
       state.emailVerified = false;
+      state.role = null;
     },
     clearError: (state) => {
       state.error = null;
     },
     setAuthState: (state, action) => {
-      // For persisting auth state (e.g., from localStorage)
       if (action.payload) {
         state.user = action.payload.user;
         state.token = action.payload.token;
         state.refreshToken = action.payload.refreshToken;
         state.isAuthenticated = !!action.payload.token;
         state.emailVerified = action.payload.emailVerified || false;
+        state.role = action.payload.user?.role || null;
       }
     }
   },
   extraReducers: (builder) => {
+    // First handle all specific fulfilled cases
     builder
-      // Common pending state
-      .addMatcher(
-        (action) => action.type.startsWith('auth/') && action.type.endsWith('/pending'),
-        (state) => {
-          state.status = 'loading';
-          state.error = null;
-        }
-      )
-      
-      // Login Cases
       .addCase(login.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.user = action.payload.user;
@@ -157,11 +150,10 @@ const authSlice = createSlice({
         state.refreshToken = action.payload.refreshToken;
         state.isAuthenticated = true;
         state.emailVerified = action.payload.emailVerified || false;
+        state.role = action.payload.user?.role || null;
         localStorage.setItem('token', action.payload.token);
         localStorage.setItem('refreshToken', action.payload.refreshToken);
       })
-      
-      // Registration Cases
       .addCase(registerAdmin.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.user = action.payload.user;
@@ -170,18 +162,40 @@ const authSlice = createSlice({
         state.emailVerified = action.payload.emailVerified || false;
         localStorage.setItem('token', action.payload.token);
       })
-      
-      // Email Verification
       .addCase(verifyEmail.fulfilled, (state) => {
         state.emailVerified = true;
         if (state.user) {
           state.user.emailVerified = true;
         }
-      })
-      
-      // Common error handling
+      });
+
+    // Then add matchers for pending/rejected states
+    builder
       .addMatcher(
-        (action) => action.type.startsWith('auth/') && action.type.endsWith('/rejected'),
+        isAnyOf(
+          login.pending,
+          registerAdmin.pending,
+          registerUser.pending,
+          refreshToken.pending,
+          verifyEmail.pending,
+          requestPasswordReset.pending,
+          resetPassword.pending
+        ),
+        (state) => {
+          state.status = 'loading';
+          state.error = null;
+        }
+      )
+      .addMatcher(
+        isAnyOf(
+          login.rejected,
+          registerAdmin.rejected,
+          registerUser.rejected,
+          refreshToken.rejected,
+          verifyEmail.rejected,
+          requestPasswordReset.rejected,
+          resetPassword.rejected
+        ),
         (state, action) => {
           state.status = 'failed';
           state.error = action.payload?.message || 'An error occurred';
@@ -216,6 +230,11 @@ export const selectAuthStatus = createSelector(
 export const selectAuthError = createSelector(
   [selectAuthState],
   (auth) => auth.error
+);
+
+export const selectCurrentRole = createSelector(
+  [selectAuthState],
+  (auth) => auth.role || auth.user?.role
 );
 
 export const selectUserRole = createSelector(
